@@ -11,9 +11,53 @@
       <div>{{ award.description }}</div>
     </div>
     <div class="lottery">
-      <button>参与抽奖</button>
-      <span>目前已有{{ joinNum }}人参与</span>
+      <button @click="submitJoin">参与抽奖</button>
+      <span>-目前已有{{ joinNum }}人参与-</span>
     </div>
+    <yd-popup v-model="showFlag" position="center" width="90%">
+      <div class="popup">
+        <h3>登记信息</h3>
+        <yd-cell-group>
+          <yd-cell-item>
+            <span slot="left">姓名</span>
+            <yd-input
+              slot="right"
+              required
+              v-model="user.name"
+              ref="name"
+              max="20"
+              placeholder="请输入姓名"
+            ></yd-input>
+          </yd-cell-item>
+          <p
+            slot="bottom"
+            style="color:#F00;padding: 0 .3rem;"
+            v-html="nameValid"
+          ></p>
+          <yd-cell-item>
+            <span slot="left">手机</span>
+            <yd-input
+              required
+              slot="right"
+              v-model="user.phone"
+              ref="phone"
+              regex="mobile"
+              placeholder="请输入手机号"
+            ></yd-input>
+          </yd-cell-item>
+          <p
+            slot="bottom"
+            style="color:#F00;padding: 0 .3rem;"
+            v-html="phoneValid"
+          ></p>
+        </yd-cell-group>
+        <p style="text-align: center;">
+          <yd-button size="large" @click.native="submitUserInfo"
+            >提交</yd-button
+          >
+        </p>
+      </div>
+    </yd-popup>
   </div>
 </template>
 <script>
@@ -26,8 +70,40 @@ export default {
         number: 1,
         description: "默认抽奖详情描述"
       },
-      joinNum: 19999
+      joinNum: 19999,
+      user: {
+        name: "",
+        phone: ""
+      },
+      showFlag: false,
+      nameValid: "",
+      phoneValid: ""
     };
+  },
+  methods: {
+    submitJoin() {
+      // 第一次需要登陆，之后尝试使用localStorage来记录
+      if (!this.user.name || !this.user.phone) {
+        console.log("no user info");
+        this.showFlag = true;
+      }
+    },
+    submitUserInfo() {
+      // 先验证
+      const name = this.$refs.name;
+      const phone = this.$refs.phone;
+      this.nameValid = name.valid ? "" : `姓名${name.errorMsg}`;
+      this.phoneValid = phone.valid ? "" : `手机${phone.errorMsg}`;
+      if (name.valid && phone.valid) {
+        //处理用户信息，发送后端
+        this.$dialog.toast({
+          mes: "提交成功",
+          timeout: 1500,
+          icon: "success"
+        });
+        this.showFlag = false;
+      }
+    }
   }
 };
 </script>
@@ -94,6 +170,16 @@ export default {
     color: #fff;
     animation: scale 1.5s ease infinite;
     border-color: #ce5041;
+  }
+}
+.popup {
+  background: #fff;
+  h3 {
+    font-size: 1rem;
+  }
+  padding: 20px 10px;
+  /deep/ .yd-input > input {
+    text-align: right;
   }
 }
 @keyframes scale {
