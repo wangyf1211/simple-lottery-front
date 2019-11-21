@@ -23,6 +23,14 @@
           placeholder="请输入奖品份数[0-99]"
         ></yd-input>
       </yd-cell-item>
+      <yd-cell-item>
+        <yd-textarea
+          slot="right"
+          placeholder="请输入奖品详情描述"
+          v-model="award.description"
+          maxlength="100"
+        ></yd-textarea>
+      </yd-cell-item>
       <div class="time">
         <label>开奖时间</label>
         <el-date-picker
@@ -47,7 +55,8 @@ export default {
       award: {
         name: "",
         number: "",
-        time: ""
+        time: "",
+        description: ""
       }
     };
   }
@@ -68,6 +77,9 @@ export default {
   }
   /deep/ .yd-input input {
     text-align: right;
+  }
+  /deep/ .yd-textarea > textarea {
+    font-size: 14px;
   }
   .time {
     display: flex;

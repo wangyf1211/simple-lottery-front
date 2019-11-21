@@ -1,7 +1,7 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
 import Publish from "../views/Publish.vue";
-
+import Join from "../views/Join.vue";
 Vue.use(VueRouter);
 
 const routes = [
@@ -9,6 +9,11 @@ const routes = [
     path: "/publish",
     name: "publish",
     component: Publish
+  },
+  {
+    path: "/join",
+    name: "join",
+    component: Join
   },
   {
     path: "/about",
