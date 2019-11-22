@@ -138,13 +138,30 @@ export default {
     submitPublish() {
       //先验证
       console.log(this.award);
-      const name = this.$refs.name;
-      const number = this.$refs.number;
+      const nameList = this.$refs.name;
+      console.log("refs", this);
+      const numberList = this.$refs.number;
       const time = this.$refs.datetime;
-      this.validResult = name.valid ? "" : "奖品名称" + name.errorMsg;
-      this.validResult += number.valid ? "" : "\n奖品数量" + number.errorMsg;
-      console.log("time", time);
-      let timeValid = false;
+      this.validResult = "";
+      let timeValid = false,
+        nameValid = true,
+        numberValid = true;
+      for (let i = 0; i < nameList.length; i++) {
+        if (!nameList[i].valid) {
+          nameValid = false;
+        }
+        if (!numberList[i].valid) {
+          numberValid = false;
+        }
+        this.validResult += nameList[i].valid
+          ? ""
+          : "奖品" + (i + 1) + "名称" + nameList[i].errorMsg + "<br/>";
+        this.validResult += numberList[i].valid
+          ? ""
+          : "\n奖品" + (i + 1) + "数量" + numberList[i].errorMsg + "<br/>";
+      }
+      // this.validResult = name.valid ? "" : "奖品名称" + name.errorMsg;
+      // this.validResult += number.valid ? "" : "\n奖品数量" + number.errorMsg;
       if (!time.value) {
         this.validResult += "\n抽奖时间不能为空";
       } else if (time.value - Date.now() <= 0) {
@@ -152,7 +169,7 @@ export default {
       } else {
         timeValid = true;
       }
-      if (name.valid && number.valid && timeValid) {
+      if (nameValid && numberValid && timeValid) {
         // 将数据发送到后端
         this.$dialog.toast({
           mes: "提交成功",
@@ -191,8 +208,8 @@ export default {
   .add-btn {
     margin: 5px 0;
     border: none;
-    color: #0e68ff;
-    font-size: 0.3rem;
+    color: #327efd;
+    font-size: 0.9rem;
   }
   .time {
     display: flex;
