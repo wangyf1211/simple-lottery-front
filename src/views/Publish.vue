@@ -2,14 +2,22 @@
   <div class="publish-lottery">
     <img alt="logo" src="../assets/logo.png" />
     <h3>发布抽奖</h3>
-    <yd-cell-group>
+    <yd-cell-group v-for="(item, index) in lottery.awardList" :key="index">
       <yd-cell-item>
-        <span slot="left">奖品名称</span>
+        <span slot="left">
+          <yd-icon
+            class="remove"
+            v-if="index > 0"
+            name="delete"
+            @click.native="removeAward"
+          ></yd-icon
+          >{{ item.label }}
+        </span>
         <yd-input
           slot="right"
           ref="name"
           required
-          v-model="award.name"
+          v-model="item.name"
           max="20"
           placeholder="请输入奖品名称"
         ></yd-input>
@@ -20,24 +28,34 @@
           required
           ref="number"
           slot="right"
-          v-model="award.number"
+          v-model="item.number"
           regex="^\d{1,2}$"
           placeholder="请输入奖品份数[0-99]"
         ></yd-input>
       </yd-cell-item>
+      <yd-button
+        size="large"
+        type="hollow"
+        class="add-btn"
+        @click.native="addAward"
+        v-if="index + 1 == lottery.awardList.length"
+        >+添加奖品</yd-button
+      >
+    </yd-cell-group>
+    <yd-cell-group>
       <yd-cell-item>
         <yd-textarea
           slot="right"
           ref="description"
           placeholder="请输入奖品详情描述"
-          v-model="award.description"
+          v-model="lottery.description"
           maxlength="100"
         ></yd-textarea>
       </yd-cell-item>
       <div class="time">
         <label>开奖时间</label>
         <el-date-picker
-          v-model="award.time"
+          v-model="lottery.time"
           ref="datetime"
           prefix-icon=""
           type="datetime"
@@ -60,19 +78,63 @@
 
 <script>
 export default {
-  name: "home",
+  name: "publish",
   data() {
     return {
-      award: {
-        name: "",
-        number: "",
+      lottery: {
         time: "",
-        description: ""
+        description: "",
+        awardList: [
+          {
+            label: "奖品名称",
+            name: "",
+            number: ""
+          }
+        ]
       },
-      validResult: ""
+      validResult: "",
+      labelMap: new Map()
     };
   },
+  created() {
+    this.labelMap.set(2, "二等奖名称").set(3, "三等奖名称");
+  },
   methods: {
+    addAward() {
+      let len = this.lottery.awardList.length;
+      if (len === 3) {
+        this.$dialog.toast({
+          mes: "最多添加三个奖品",
+          timeout: 1500,
+          icon: "error"
+        });
+        return;
+      }
+      this.lottery.awardList.splice(0, 1, {
+        label: "一等奖名称",
+        name: this.lottery.awardList[0].name,
+        number: this.lottery.awardList[0].number
+      });
+      this.lottery.awardList.push({
+        label: this.labelMap.get(len + 1),
+        name: "",
+        number: ""
+      });
+    },
+    removeAward() {
+      let len = this.lottery.awardList.length;
+      if (len == 1) {
+        return;
+      }
+      if (len == 2) {
+        this.lottery.awardList.splice(0, 1, {
+          label: "奖品名称",
+          name: this.lottery.awardList[0].name,
+          number: this.lottery.awardList[0].number
+        });
+      }
+      this.lottery.awardList.pop();
+    },
     submitPublish() {
       //先验证
       console.log(this.award);
@@ -112,6 +174,11 @@ export default {
     width: 100px;
     height: 100px;
   }
+  .remove {
+    font-size: 1rem;
+    margin-right: 5px;
+    color: red;
+  }
   .yd-cell-box {
     margin: 30px 0 50px 0;
   }
@@ -120,6 +187,12 @@ export default {
   }
   /deep/ .yd-textarea > textarea {
     font-size: 14px;
+  }
+  .add-btn {
+    margin: 5px 0;
+    border: none;
+    color: #0e68ff;
+    font-size: 0.3rem;
   }
   .time {
     display: flex;
