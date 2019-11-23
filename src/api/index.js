@@ -2,10 +2,10 @@ import axios from "axios";
 import qs from "qs";
 
 export default {
-  fetchPost(url, params) {
+  fetchPost(url, data, config = {}) {
     return new Promise((resolve, reject) => {
       axios
-        .post(url, params)
+        .post(url, data, config)
         .then(response => {
           resolve(response.data);
         })
