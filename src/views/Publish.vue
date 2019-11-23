@@ -1,64 +1,78 @@
 <template>
   <div class="publish-lottery">
-    <img alt="logo"
-         src="../assets/logo.png" />
+    <img alt="logo" src="../assets/logo.png" />
     <h3>发布抽奖</h3>
-    <yd-cell-group v-for="(item, index) in lottery.awardList"
-                   :key="index">
+    <yd-cell-group v-for="(item, index) in lottery.awardList" :key="index">
       <yd-cell-item>
         <span slot="left">
-          <yd-icon class="remove"
-                   v-if="index > 0"
-                   name="delete"
-                   @click.native="removeAward"></yd-icon>{{ item.label }}
+          <yd-icon
+            class="remove"
+            v-if="index > 0"
+            name="delete"
+            @click.native="removeAward"
+          ></yd-icon
+          >{{ item.label }}
         </span>
-        <yd-input slot="right"
-                  ref="name"
-                  required
-                  v-model="item.name"
-                  max="20"
-                  placeholder="请输入奖品名称"></yd-input>
+        <yd-input
+          slot="right"
+          ref="name"
+          required
+          v-model="item.name"
+          max="20"
+          placeholder="请输入奖品名称"
+        ></yd-input>
       </yd-cell-item>
       <yd-cell-item>
         <span slot="left">奖品份数</span>
-        <yd-input required
-                  ref="number"
-                  slot="right"
-                  v-model="item.number"
-                  regex="^\d{1,2}$"
-                  placeholder="请输入奖品份数[0-99]"></yd-input>
+        <yd-input
+          required
+          ref="number"
+          slot="right"
+          v-model="item.number"
+          regex="^\d{1,2}$"
+          placeholder="请输入奖品份数[0-99]"
+        ></yd-input>
       </yd-cell-item>
-      <yd-button size="large"
-                 type="hollow"
-                 class="add-btn"
-                 @click.native="addAward"
-                 v-if="index + 1 == lottery.awardList.length">+添加奖品</yd-button>
+      <yd-button
+        size="large"
+        type="hollow"
+        class="add-btn"
+        @click.native="addAward"
+        v-if="index + 1 == lottery.awardList.length"
+        >+添加奖品</yd-button
+      >
     </yd-cell-group>
     <yd-cell-group>
       <yd-cell-item>
-        <yd-textarea slot="right"
-                     ref="description"
-                     placeholder="请输入奖品详情描述"
-                     v-model="lottery.description"
-                     maxlength="100"></yd-textarea>
+        <yd-textarea
+          slot="right"
+          ref="description"
+          placeholder="请输入奖品详情描述"
+          v-model="lottery.description"
+          maxlength="100"
+        ></yd-textarea>
       </yd-cell-item>
       <div class="time">
         <label>开奖时间</label>
-        <el-date-picker v-model="lottery.time"
-                        ref="datetime"
-                        prefix-icon=""
-                        type="datetime"
-                        placeholder="选择日期时间"
-                        required>
+        <el-date-picker
+          v-model="lottery.time"
+          ref="datetime"
+          prefix-icon=""
+          type="datetime"
+          placeholder="选择日期时间"
+          required
+        >
         </el-date-picker>
       </div>
-      <p slot="bottom"
-         style="color:#F00;padding: 0 .3rem;"
-         v-html="validResult"></p>
+      <p
+        slot="bottom"
+        style="color:#F00;padding: 0 .3rem;"
+        v-html="validResult"
+      ></p>
     </yd-cell-group>
-    <yd-button size="large"
-               type="primary"
-               @click.native="submitPublish()">提交</yd-button>
+    <yd-button size="large" type="primary" @click.native="submitPublish()"
+      >提交</yd-button
+    >
   </div>
 </template>
 

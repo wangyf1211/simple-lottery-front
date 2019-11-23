@@ -1,12 +1,15 @@
 <template>
   <div class="join">
     <div class="header">
-      <img src="../assets/header.png" alt="图片" />
+      <img src="../assets/header.png"
+           alt="图片" />
       <h2>抽奖活动</h2>
       <div class="award-info">
         <span class="strong">“</span>
-        <p v-for="(item, index) in awardList" :key="index">
-          <span class="price" v-if="awardList.length > 1">{{
+        <p v-for="(item, index) in awardList"
+           :key="index">
+          <span class="price"
+                v-if="awardList.length > 1">{{
             item.price
           }}</span>
           {{ item.name }}-{{ item.number }}份
@@ -18,15 +21,18 @@
       <h3>抽奖详情</h3>
       <div>{{ lottery.description }}</div>
     </div>
-    <div class="lottery-to-join" v-if="lottery.status == 0 && !user.joinFlag">
+    <div class="lottery-to-join"
+         v-if="lottery.status == 0 && !user.joinFlag">
       <button @click="submitJoin">参与抽奖</button>
       <span>-目前已有{{ lottery.joinNum }}人参与-</span>
     </div>
-    <div class="lottery-joined" v-if="lottery.status == 0 && user.joinFlag">
+    <div class="lottery-joined"
+         v-if="lottery.status == 0 && user.joinFlag">
       <button @click="submitWait">待开奖</button>
       <span>-目前已有{{ lottery.joinNum }}人参与-</span>
     </div>
-    <div class="lottery-end" v-if="lottery.status == 1">
+    <div class="lottery-end"
+         v-if="lottery.status == 1">
       <div class="result">
         <div v-if="user.award != null">
           <h3>恭喜你中奖啦！</h3>
@@ -41,65 +47,59 @@
           ———— 中奖者名单 ————
         </div>
         <div class="winner-list">
-          <div v-for="(item, index) in awardResult" :key="index">
+          <div v-for="(item, index) in awardResult"
+               :key="index">
             <span>奖品:{{ item.name }} x {{ item.number }}份</span>
-            <ul v-for="(winner, idx) in item.winners" :key="idx">
+            <ul v-for="(winner, idx) in item.winners"
+                :key="idx">
               <li>{{ winner.name }}-{{ winner.phone }}</li>
             </ul>
           </div>
         </div>
-        <span style="padding-bottom:2rem;"
-          >-感谢{{ lottery.joinNum }}人参与-</span
-        >
+        <span style="padding-bottom:2rem;">-感谢{{ lottery.joinNum }}人参与-</span>
       </div>
     </div>
-    <yd-popup v-model="showFlag" position="center" width="90%">
+    <yd-popup v-model="showFlag"
+              position="center"
+              width="90%">
       <div class="popup">
         <h3>登记信息</h3>
         <yd-cell-group>
           <yd-cell-item>
             <span slot="left">姓名</span>
-            <yd-input
-              slot="right"
-              required
-              v-model="user.name"
-              ref="name"
-              max="20"
-              placeholder="请输入姓名"
-            ></yd-input>
+            <yd-input slot="right"
+                      required
+                      v-model="user.name"
+                      ref="name"
+                      max="20"
+                      placeholder="请输入姓名"></yd-input>
           </yd-cell-item>
-          <p
-            slot="bottom"
-            style="color:#F00;padding: 0 .3rem;"
-            v-html="nameValid"
-          ></p>
+          <p slot="bottom"
+             style="color:#F00;padding: 0 .3rem;"
+             v-html="nameValid"></p>
           <yd-cell-item>
             <span slot="left">手机</span>
-            <yd-input
-              required
-              slot="right"
-              v-model="user.phone"
-              ref="phone"
-              regex="mobile"
-              placeholder="请输入手机号"
-            ></yd-input>
+            <yd-input required
+                      slot="right"
+                      v-model="user.phone"
+                      ref="phone"
+                      regex="mobile"
+                      placeholder="请输入手机号"></yd-input>
           </yd-cell-item>
-          <p
-            slot="bottom"
-            style="color:#F00;padding: 0 .3rem;"
-            v-html="phoneValid"
-          ></p>
+          <p slot="bottom"
+             style="color:#F00;padding: 0 .3rem;"
+             v-html="phoneValid"></p>
         </yd-cell-group>
         <p style="text-align: center;">
-          <yd-button size="large" @click.native="submitUserInfo"
-            >提交</yd-button
-          >
+          <yd-button size="large"
+                     @click.native="submitUserInfo">提交</yd-button>
         </p>
       </div>
     </yd-popup>
   </div>
 </template>
 <script>
+import http from "../api";
 export default {
   name: "join",
   data() {
@@ -108,7 +108,7 @@ export default {
         description: "默认抽奖详情描述",
         startTime: "11月24日 00:00",
         joinNum: 19999,
-        status: 1
+        status: 0
       },
       awardList: [
         {
@@ -170,13 +170,22 @@ export default {
             }
           ]
         }
-      ]
+      ],
+      priceMap: new Map()
     };
   },
   computed: {
     dealAwardName() {
       return !this.user.award.price ? "奖品" : this.user.award.price;
     }
+  },
+  created() {
+    this.priceMap
+      .set(1, "一等奖")
+      .set(2, "二等奖")
+      .set(3, "三等奖");
+    let lotteryId = this.$route.params.lotteryId;
+    this.getLotteryInfo(lotteryId);
   },
   methods: {
     submitJoin() {
@@ -201,6 +210,27 @@ export default {
         });
         this.showFlag = false;
       }
+    },
+    getLotteryInfo(id) {
+      http
+        .fetchGet("/api/lottery/getInfo", {
+          lotteryId: id
+        })
+        .then(res => {
+          console.log(res);
+          if (res.code == 200) {
+            this.lottery.startTime = res.data.startTime;
+            this.lottery.description = res.data.description;
+            this.lottery.status = res.data.status;
+            this.awardList = this.dealPrice(res.data.awardList);
+          }
+        });
+    },
+    dealPrice(awardList) {
+      for (let item of awardList) {
+        item.price = this.priceMap.get(item.price);
+      }
+      return awardList;
     }
   }
 };
@@ -268,19 +298,18 @@ export default {
     width: 120px;
     height: 120px;
     color: #fff;
+    border-color: transparent;
   }
 }
 .lottery-to-join {
   button {
     background: #ce5041;
     animation: scale 1.5s ease infinite;
-    border-color: #ce5041;
   }
 }
 .lottery-joined {
   button {
     background: #ea7b76;
-    border-color: #ea7b76;
   }
 }
 .lottery-end {
