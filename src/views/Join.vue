@@ -1,12 +1,15 @@
 <template>
   <div class="join">
     <div class="header">
-      <img src="../assets/header.png" alt="图片" />
+      <img src="../assets/header.png"
+           alt="图片" />
       <h2>抽奖活动</h2>
       <div class="award-info">
         <span class="strong">“</span>
-        <p v-for="(item, index) in awardList" :key="index">
-          <span class="price" v-if="awardList.length > 1">{{
+        <p v-for="(item, index) in awardList"
+           :key="index">
+          <span class="price"
+                v-if="awardList.length > 1">{{
             item.price
           }}</span>
           {{ item.name }}-{{ item.number }}份
@@ -18,15 +21,18 @@
       <h3>抽奖详情</h3>
       <div>{{ lottery.description }}</div>
     </div>
-    <div class="lottery-to-join" v-if="lottery.status == 0 && !user.joinFlag">
+    <div class="lottery-to-join"
+         v-if="lottery.status == 0 && !user.joinFlag">
       <button @click="submitJoin">参与抽奖</button>
       <span>-目前已有{{ lottery.joinNum }}人参与-</span>
     </div>
-    <div class="lottery-joined" v-if="lottery.status == 0 && user.joinFlag">
+    <div class="lottery-joined"
+         v-if="lottery.status == 0 && user.joinFlag">
       <button>待开奖</button>
       <span>-目前已有{{ lottery.joinNum }}人参与-</span>
     </div>
-    <div class="lottery-end" v-if="lottery.status == 1">
+    <div class="lottery-end"
+         v-if="lottery.status == 1">
       <div class="result">
         <div v-if="!user.name || !user.phone">
           <span>好久不见～确认信息先</span>
@@ -45,63 +51,58 @@
           <h3 style="color:#111;">很遗憾，你未中奖</h3>
           <span>再接再厉，中奖也许会迟到</span>
         </div>
-        <div style="font-size:0.95rem;" v-if="user.name && user.phone">
+        <div style="font-size:0.95rem;"
+             v-if="user.name && user.phone">
           ———— 中奖者名单 ————
         </div>
-        <div class="winner-list" v-if="user.name && user.phone">
-          <div v-for="(item, index) in awardResult" :key="index">
+        <div class="winner-list"
+             v-if="user.name && user.phone">
+          <div v-for="(item, index) in awardResult"
+               :key="index">
             <span>奖品:{{ item.name }} x {{ item.number }}份</span>
-            <ul v-for="(winner, idx) in item.winners" :key="idx">
+            <ul v-for="(winner, idx) in item.winners"
+                :key="idx">
               <li>{{ winner.name }}-{{ winner.phone }}</li>
             </ul>
           </div>
         </div>
-        <span style="padding-bottom:2rem;"
-          >-感谢{{ lottery.joinNum }}人参与-</span
-        >
+        <span style="padding-bottom:2rem;">-感谢{{ lottery.joinNum }}人参与-</span>
       </div>
     </div>
-    <yd-popup v-model="showFlag" position="center" width="90%">
+    <yd-popup v-model="showFlag"
+              position="center"
+              width="90%">
       <div class="popup">
         <h3>登记信息</h3>
         <yd-cell-group>
           <yd-cell-item>
             <span slot="left">姓名</span>
-            <yd-input
-              slot="right"
-              required
-              v-model="userInput.name"
-              ref="name"
-              max="20"
-              placeholder="请输入姓名"
-            ></yd-input>
+            <yd-input slot="right"
+                      required
+                      v-model="userInput.name"
+                      ref="name"
+                      max="20"
+                      placeholder="请输入姓名"></yd-input>
           </yd-cell-item>
-          <p
-            slot="bottom"
-            style="color:#F00;padding: 0 .3rem;"
-            v-html="nameValid"
-          ></p>
+          <p slot="bottom"
+             style="color:#F00;padding: 0 .3rem;"
+             v-html="nameValid"></p>
           <yd-cell-item>
             <span slot="left">手机</span>
-            <yd-input
-              required
-              slot="right"
-              v-model="userInput.phone"
-              ref="phone"
-              regex="mobile"
-              placeholder="请输入手机号"
-            ></yd-input>
+            <yd-input required
+                      slot="right"
+                      v-model="userInput.phone"
+                      ref="phone"
+                      regex="mobile"
+                      placeholder="请输入手机号"></yd-input>
           </yd-cell-item>
-          <p
-            slot="bottom"
-            style="color:#F00;padding: 0 .3rem;"
-            v-html="phoneValid"
-          ></p>
+          <p slot="bottom"
+             style="color:#F00;padding: 0 .3rem;"
+             v-html="phoneValid"></p>
         </yd-cell-group>
         <p style="text-align: center;">
-          <yd-button size="large" @click.native="submitUserInfo"
-            >提交</yd-button
-          >
+          <yd-button size="large"
+                     @click.native="submitUserInfo">提交</yd-button>
         </p>
       </div>
     </yd-popup>
@@ -202,14 +203,20 @@ export default {
       .set(2, "二等奖")
       .set(3, "三等奖");
     this.lotteryId = +this.$route.params.lotteryId;
-    this.getLotteryInfo(this.lotteryId);
     let userLocal = JSON.parse(window.localStorage.getItem("user"));
-    console.log("userLocal", userLocal);
     if (userLocal != null) {
       this.user = Object.assign({}, userLocal);
     }
+    this.getLottery();
   },
   methods: {
+    getLottery() {
+      this.getLotteryInfo(this.lotteryId).then(() => {
+        if (this.lottery.status == 1) {
+          this.getLotteryResult();
+        }
+      });
+    },
     submitJoin() {
       // 第一次需要登陆，之后尝试使用localStorage来记录
       if (!this.user.name || !this.user.phone) {
@@ -316,27 +323,44 @@ export default {
     },
     getLotteryInfo(id) {
       this.$dialog.loading.open("拼命加载中...");
+      return new Promise(resolve => {
+        http
+          .fetchGet("/api/lottery/getInfo", {
+            lotteryId: id
+          })
+          .then(res => {
+            this.$dialog.loading.close();
+            console.log(res);
+            if (res.code == 200) {
+              this.lottery.startTime = res.data.startTime;
+              this.lottery.description = res.data.description;
+              this.lottery.status = res.data.status;
+              this.lottery.joinNum = res.data.count;
+              this.awardList = this.dealPrice(res.data.awardList);
+              resolve();
+            }
+          })
+          .catch(() => {
+            this.$dialog.toast({
+              mes: "请稍后重试",
+              timeout: 1500,
+              icon: "error"
+            });
+          });
+      });
+    },
+    getLotteryResult() {
+      this.$dialog.loading.open("拼命加载中...");
       http
-        .fetchGet("/api/lottery/getInfo", {
-          lotteryId: id
+        .fetchGet("/api/resultList/get", {
+          lotteryId: this.lotteryId
         })
         .then(res => {
           this.$dialog.loading.close();
           console.log(res);
           if (res.code == 200) {
-            this.lottery.startTime = res.data.startTime;
-            this.lottery.description = res.data.description;
-            this.lottery.status = 1;
-            this.lottery.joinNum = res.data.count;
-            this.awardList = this.dealPrice(res.data.awardList);
+            this.awardResult = res.data;
           }
-        })
-        .catch(() => {
-          this.$dialog.toast({
-            mes: "请稍后重试",
-            timeout: 1500,
-            icon: "error"
-          });
         });
     },
     dealPrice(awardList) {
