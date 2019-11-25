@@ -104,10 +104,7 @@ export default {
       ],
       userList: [
         { id: 1, name: "张三", phone: "13412351235" },
-        { id: 2, name: "李四", phone: "13412351235" },
-        { id: 3, name: "王五", phone: "13412351235" },
-        { id: 4, name: "小明", phone: "13412351235" },
-        { id: 5, name: "小刚", phone: "13412351235" }
+        { id: 2, name: "李四", phone: "13412351235" }
       ],
       awardResult: [
         {
@@ -194,7 +191,9 @@ export default {
           this.$dialog.loading.close();
           console.log(res);
           if (res.code == 200) {
-            this.awardResult = dealPrice(res.data);
+            this.awardResult = dealPrice(
+              res.data.sort((a, b) => a.price - b.price)
+            );
           }
         });
     },

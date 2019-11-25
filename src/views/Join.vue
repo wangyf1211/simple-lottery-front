@@ -373,7 +373,7 @@ export default {
           this.$dialog.loading.close();
           console.log(res);
           if (res.code == 200) {
-            this.awardResult = res.data;
+            this.awardResult = res.data.sort((a, b) => a.price - b.price);
           }
         });
     },
