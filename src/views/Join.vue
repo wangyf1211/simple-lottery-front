@@ -23,24 +23,32 @@
       <span>-目前已有{{ lottery.joinNum }}人参与-</span>
     </div>
     <div class="lottery-joined" v-if="lottery.status == 0 && user.joinFlag">
-      <button @click="submitWait">待开奖</button>
+      <button>待开奖</button>
       <span>-目前已有{{ lottery.joinNum }}人参与-</span>
     </div>
     <div class="lottery-end" v-if="lottery.status == 1">
       <div class="result">
-        <div v-if="user.award != null">
+        <div v-if="!user.name || !user.phone">
+          <span>好久不见～确认信息先</span>
+          <button @click="submitJoin">抽奖结果</button>
+        </div>
+        <div v-else-if="!user.joinFlag">
+          <h3 style="color:#111;">您未参加本次抽奖活动</h3>
+          <span>完美错过 下次活动别忘记参加～</span>
+        </div>
+        <div v-else-if="user.joinFlag && user.awardFlag">
           <h3>恭喜你中奖啦！</h3>
           <h4>{{ dealAwardName }}：{{ user.award.name }}</h4>
           <span>请及时联系发起人领取奖品～</span>
         </div>
-        <div v-else>
+        <div v-else-if="user.joinFlag && !user.awardFlag">
           <h3 style="color:#111;">很遗憾，你未中奖</h3>
           <span>再接再厉，中奖也许会迟到</span>
         </div>
-        <div style="font-size:0.95rem;">
+        <div style="font-size:0.95rem;" v-if="user.name && user.phone">
           ———— 中奖者名单 ————
         </div>
-        <div class="winner-list">
+        <div class="winner-list" v-if="user.name && user.phone">
           <div v-for="(item, index) in awardResult" :key="index">
             <span>奖品:{{ item.name }} x {{ item.number }}份</span>
             <ul v-for="(winner, idx) in item.winners" :key="idx">
@@ -62,7 +70,7 @@
             <yd-input
               slot="right"
               required
-              v-model="user.name"
+              v-model="userInput.name"
               ref="name"
               max="20"
               placeholder="请输入姓名"
@@ -78,7 +86,7 @@
             <yd-input
               required
               slot="right"
-              v-model="user.phone"
+              v-model="userInput.phone"
               ref="phone"
               regex="mobile"
               placeholder="请输入手机号"
@@ -108,7 +116,7 @@ export default {
       lottery: {
         description: "默认抽奖详情描述",
         startTime: "11月24日 00:00",
-        joinNum: 19999,
+        joinNum: 2,
         status: 0
       },
       awardList: [
@@ -128,10 +136,15 @@ export default {
           price: "三等奖"
         }
       ],
+      userInput: {
+        name: "",
+        phone: ""
+      },
       user: {
         name: "",
         phone: "",
         joinFlag: false,
+        awardFlag: false,
         // award: {
         //   name: "***********",
         //   price: ""
@@ -178,7 +191,9 @@ export default {
   },
   computed: {
     dealAwardName() {
-      return !this.user.award.price ? "奖品" : this.user.award.price;
+      return !this.user.award.price
+        ? "奖品"
+        : this.priceMap.get(this.user.award.price);
     }
   },
   created() {
@@ -208,67 +223,120 @@ export default {
       this.nameValid = name.valid ? "" : `姓名${name.errorMsg}`;
       this.phoneValid = phone.valid ? "" : `手机${phone.errorMsg}`;
       if (name.valid && phone.valid) {
-        http
-          .fetchPost(
-            "/api/user/register",
-            {
-              name: this.user.name,
-              phone: this.user.phone
-            },
-            {
-              params: {
-                lotteryId: this.lotteryId
-              }
+        this.$dialog.loading.open("拼命加载中...");
+        if (this.lottery.status == 0) {
+          this.registerUser();
+        } else {
+          this.confirmUser();
+        }
+        this.showFlag = false;
+      }
+    },
+    registerUser() {
+      http
+        .fetchPost(
+          "/api/user/register",
+          {
+            name: this.userInput.name,
+            phone: this.userInput.phone
+          },
+          {
+            params: {
+              lotteryId: this.lotteryId
             }
-          )
-          .then(res => {
-            console.log(res);
-            if (res.code == 200) {
-              this.user.joinFlag = res.data.joinFlag;
-              window.localStorage.setItem("user", JSON.stringify(this.user));
-              this.$dialog.toast({
-                mes: "登记信息册成功",
-                timeout: 1500,
-                icon: "success"
-              });
-            } else {
-              this.$dialog.toast({
-                mes: "请稍后重试",
-                timeout: 1500,
-                icon: "error"
-              });
-            }
-          })
-          .catch(() => {
+          }
+        )
+        .then(res => {
+          this.$dialog.loading.close();
+          console.log(res);
+          if (res.code == 200) {
+            this.user.name = res.data.name;
+            this.user.phone = res.data.phone;
+            this.user.joinFlag = res.data.joinFlag;
+            window.localStorage.setItem("user", JSON.stringify(this.user));
+            this.$dialog.toast({
+              mes: "登记信息成功",
+              timeout: 1500,
+              icon: "success"
+            });
+          } else {
             this.$dialog.toast({
               mes: "请稍后重试",
               timeout: 1500,
               icon: "error"
             });
+          }
+        })
+        .catch(() => {
+          this.$dialog.loading.close();
+          this.$dialog.toast({
+            mes: "请稍后重试",
+            timeout: 1500,
+            icon: "error"
           });
-        //处理用户信息，发送后端
-        this.$dialog.toast({
-          mes: "提交成功",
-          timeout: 1500,
-          icon: "success"
         });
-        this.showFlag = false;
-      }
+    },
+    confirmUser() {
+      http
+        .fetchPost(
+          "/api/user/confirm",
+          {
+            name: this.userInput.name,
+            phone: this.userInput.phone
+          },
+          {
+            params: {
+              lotteryId: this.lotteryId
+            }
+          }
+        )
+        .then(res => {
+          this.$dialog.loading.close();
+          console.log(res);
+          this.user.name = res.data.name;
+          this.user.phone = res.data.phone;
+          this.user.joinFlag = res.data.joinFlag;
+          this.user.awardFlag = res.data.awardFlag;
+          this.user.award = Object.assign({}, res.data.award);
+          window.localStorage.setItem("user", JSON.stringify(this.user));
+          this.$dialog.toast({
+            mes: "登记信息成功",
+            timeout: 1500,
+            icon: "success"
+          });
+        })
+        .catch(() => {
+          this.$dialog.loading.close();
+          this.$dialog.toast({
+            mes: "请稍后重试",
+            timeout: 1500,
+            icon: "error"
+          });
+        });
     },
     getLotteryInfo(id) {
+      this.$dialog.loading.open("拼命加载中...");
       http
         .fetchGet("/api/lottery/getInfo", {
           lotteryId: id
         })
         .then(res => {
+          this.$dialog.loading.close();
           console.log(res);
           if (res.code == 200) {
             this.lottery.startTime = res.data.startTime;
             this.lottery.description = res.data.description;
-            this.lottery.status = res.data.status;
+            this.lottery.status = 1;
             this.lottery.joinNum = res.data.count;
             this.awardList = this.dealPrice(res.data.awardList);
           }
+        })
+        .catch(() => {
+          this.$dialog.toast({
+            mes: "请稍后重试",
+            timeout: 1500,
+            icon: "error"
+          });
         });
     },
     dealPrice(awardList) {
@@ -358,6 +426,11 @@ export default {
   }
 }
 .lottery-end {
+  button {
+    background: #ce5041;
+    animation: scale 1.5s ease infinite;
+    margin: 20px auto;
+  }
   color: #555;
   .result {
     h3 {

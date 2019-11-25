@@ -199,9 +199,11 @@ export default {
           awardList: this.lottery.awardList
         };
         console.log(params);
+        this.$dialog.loading.open("拼命加载中...");
         http
           .fetchPost("/api/lottery/join", params)
           .then(res => {
+            this.$dialog.loading.close();
             console.log(res);
             if (res.code == 200) {
               this.$dialog.toast({
@@ -218,6 +220,7 @@ export default {
             }
           })
           .catch(() => {
+            this.$dialog.loading.close();
             this.$dialog.toast({
               mes: "创建抽奖活动失败,请稍后重试",
               timeout: 1500,

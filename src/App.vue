@@ -25,4 +25,7 @@
     }
   }
 }
+div.yd-dialog-white-mask {
+  background-color: #fff;
+}
 </style>
