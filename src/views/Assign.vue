@@ -33,6 +33,11 @@
           <span slot="left">{{ user.name }}-{{ user.phone }}</span>
         </yd-cell-item>
       </yd-cell-group>
+      <yd-cell-group title="中奖用户列表" v-if="awardResult == null">
+        <yd-cell-item>
+          <span slot="left">暂未指定中奖用户</span>
+        </yd-cell-item>
+      </yd-cell-group>
       <yd-button size="large" type="primary" @click.native="editFlag = true"
         >编辑</yd-button
       >
@@ -140,6 +145,7 @@ export default {
     this.lotteryId = +this.$route.params.lotteryId;
     this.getAdminLotteryInfo();
     this.getLotteryUserList();
+    this.getLotteryResult();
   },
   computed: {
     dealStatus() {
@@ -177,6 +183,20 @@ export default {
             });
           });
       });
+    },
+    getLotteryResult() {
+      this.$dialog.loading.open("拼命加载中...");
+      http
+        .fetchGet("/api/resultList/adminGet", {
+          lotteryId: this.lotteryId
+        })
+        .then(res => {
+          this.$dialog.loading.close();
+          console.log(res);
+          if (res.code == 200) {
+            this.awardResult = dealPrice(res.data);
+          }
+        });
     },
     getLotteryUserList() {
       this.$dialog.loading.open("拼命加载中...");
