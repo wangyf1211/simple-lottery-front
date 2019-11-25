@@ -208,7 +208,7 @@ export default {
                 timeout: 1500,
                 icon: "success"
               });
-              this.$route.push("/admin");
+              this.$router.push("/admin");
             } else {
               this.$dialog.toast({
                 mes: "创建抽奖活动失败,请稍后重试",
