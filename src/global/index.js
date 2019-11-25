@@ -9,3 +9,4 @@ export function dealPrice(awardList) {
   return awardList;
 }
 export const statusMap = new Map().set(0, "未开奖").set(1, "已开奖");
+export const baseUrl = "http://47.101.135.197/#";
