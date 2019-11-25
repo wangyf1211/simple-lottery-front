@@ -2,6 +2,7 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import Publish from "../views/Publish.vue";
 import Join from "../views/Join.vue";
+import Home from "../views/Home.vue";
 Vue.use(VueRouter);
 
 const routes = [
@@ -16,9 +17,9 @@ const routes = [
     component: Join
   },
   {
-    path: "/announce",
-    name: "announce",
-    component: () => import("../views/Announce.vue")
+    path: "/assign/:lotteryId",
+    name: "assign",
+    component: () => import("../views/Assign.vue")
   },
   {
     path: "/about",
@@ -28,6 +29,11 @@ const routes = [
     // which is lazy-loaded when the route is visited.
     component: () =>
       import(/* webpackChunkName: "about" */ "../views/About.vue")
+  },
+  {
+    path: "*",
+    name: "*",
+    component: Home
   }
 ];
 
