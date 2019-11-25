@@ -1,12 +1,13 @@
 <template>
   <div class="admin">
-    <img alt="logo"
-         src="../assets/logo.png" />
+    <img alt="logo" src="../assets/logo.png" />
     <div class="lottery-list">
       <h2>抽奖活动列表</h2>
-      <yd-preview :buttons="btns"
-                  v-for="(item, index) in lotteryList"
-                  :key="index">
+      <yd-preview
+        :buttons="btns"
+        v-for="(item, index) in lotteryList"
+        :key="index"
+      >
         <yd-preview-header>
           <div slot="left">{{ item.startTime }}</div>
           <div slot="right">{{ statusMap.get(item.status) }}</div>
@@ -23,21 +24,24 @@
           <div slot="left">参与人数</div>
           <div slot="right">{{ item.joinNum }}</div>
         </yd-preview-item>
-        <yd-preview-item v-for="(award, idx) in item.awardList"
-                         :key="idx">
+        <yd-preview-item v-for="(award, idx) in item.awardList" :key="idx">
           <div slot="left">{{ award.price }}</div>
           <div slot="right">{{ award.name }} x {{ award.number }}</div>
         </yd-preview-item>
         <div class="btn-group">
-          <yd-button type="hollow"
-                     @click.native="share(item.id)">分享二维码</yd-button>
-          <yd-button type="hollow"
-                     @click.native="assign(item.id)">指派用户</yd-button>
+          <yd-button type="hollow" @click.native="share(item.id)"
+            >分享二维码</yd-button
+          >
+          <yd-button type="hollow" @click.native="assign(item.id)"
+            >指派用户</yd-button
+          >
         </div>
       </yd-preview>
-      <yd-actionsheet :items="myItems1"
-                      v-model="show1"
-                      cancel="取消"></yd-actionsheet>
+      <yd-actionsheet
+        :items="myItems1"
+        v-model="show1"
+        cancel="取消"
+      ></yd-actionsheet>
     </div>
   </div>
 </template>
@@ -91,7 +95,6 @@ export default {
         .fetchGet("/api/lottery/getLotteryList")
         .then(res => {
           this.$dialog.loading.close();
-          console.log(res);
           if (res.code == 200) {
             this.lotteryList = res.data;
           }

@@ -22,6 +22,11 @@ const routes = [
     component: () => import("../views/Assign.vue")
   },
   {
+    path: "/share",
+    name: "share",
+    component: () => import("../views/Share.vue")
+  },
+  {
     path: "/admin",
     name: "admin",
     component: () => import("../views/Admin.vue")
