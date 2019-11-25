@@ -2,7 +2,19 @@
   <div class="admin">
     <img alt="logo" src="../assets/logo.png" />
     <div class="lottery-list">
-      <h2>抽奖活动列表</h2>
+      <!-- <h2>抽奖活动列表</h2> -->
+      <yd-cell-group
+        style="margin-bottom:3rem;"
+        title="抽奖活动列表"
+        v-if="!lotteryList || lotteryList.length == 0"
+      >
+        <yd-cell-item>
+          <span slot="left">暂无，快去创建吧～</span>
+        </yd-cell-item>
+      </yd-cell-group>
+      <yd-button size="large" type="hollow" @click.native="jumpPublish"
+        >创建抽奖活动</yd-button
+      >
       <yd-preview
         :buttons="btns"
         v-for="(item, index) in lotteryList"
@@ -83,6 +95,9 @@ export default {
     },
     assign(id) {
       this.$router.push("/assign/" + id);
+    },
+    jumpPublish() {
+      this.$router.push("/publish");
     },
     getLotteryList() {
       this.$dialog.loading.open("拼命加载中...");
