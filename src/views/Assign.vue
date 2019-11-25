@@ -33,7 +33,10 @@
           <span slot="left">{{ user.name }}-{{ user.phone }}</span>
         </yd-cell-item>
       </yd-cell-group>
-      <yd-cell-group title="中奖用户列表" v-if="awardResult == null">
+      <yd-cell-group
+        title="中奖用户列表"
+        v-if="!awardResult || awardResult.length == 0"
+      >
         <yd-cell-item>
           <span slot="left">暂未指定中奖用户</span>
         </yd-cell-item>
