@@ -6,6 +6,7 @@
 </template>
 <script>
 import QRCode from "qrcode";
+import { baseUrl } from "../global";
 export default {
   name: "share",
   data() {
@@ -18,9 +19,11 @@ export default {
   },
   methods: {
     renderQrcode() {
-      QRCode.toDataURL(this.$route.fullPath).then(url => {
-        this.imgSrc = url;
-      });
+      QRCode.toDataURL(baseUrl + "/join/" + this.$route.params.lotteryId).then(
+        url => {
+          this.imgSrc = url;
+        }
+      );
     }
   }
 };

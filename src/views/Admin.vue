@@ -37,11 +37,6 @@
           >
         </div>
       </yd-preview>
-      <yd-actionsheet
-        :items="myItems1"
-        v-model="show1"
-        cancel="取消"
-      ></yd-actionsheet>
     </div>
   </div>
 </template>
@@ -84,7 +79,7 @@ export default {
   },
   methods: {
     share(id) {
-      this.$router.push("/assign/" + id);
+      this.$router.push({ name: "share", params: { lotteryId: id } });
     },
     assign(id) {
       this.$router.push("/assign/" + id);

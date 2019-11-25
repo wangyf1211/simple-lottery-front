@@ -162,7 +162,6 @@ export default {
           })
           .then(res => {
             this.$dialog.loading.close();
-            console.log(res);
             if (res.code == 200) {
               this.lottery.startTime = res.data.startTime;
               this.lottery.description = res.data.description;
@@ -192,7 +191,6 @@ export default {
         })
         .then(res => {
           this.$dialog.loading.close();
-          console.log(res);
           if (res.code == 200) {
             this.awardResult = dealPrice(
               res.data.sort((a, b) => a.price - b.price)
@@ -208,7 +206,6 @@ export default {
         })
         .then(res => {
           this.$dialog.loading.close();
-          console.log(res);
           if (res.code == 200) {
             this.userList = res.data;
           }
@@ -236,9 +233,8 @@ export default {
             }
           }
         )
-        .then(res => {
+        .then(() => {
           this.$dialog.loading.close();
-          console.log(res);
           this.$dialog.toast({
             mes: "指派成功",
             timeout: 1500,
