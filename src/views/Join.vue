@@ -204,19 +204,24 @@ export default {
       .set(3, "三等奖");
     this.lotteryId = +this.$route.params.lotteryId;
     let userLocal = JSON.parse(window.localStorage.getItem("user"));
-    if (userLocal != null) {
-      this.user = Object.assign({}, userLocal);
+    if (userLocal != null && userLocal.lotteryId == this.lotteryId) {
+      this.user.name = userLocal.name;
+      this.user.phone = userLocal.phone;
     }
-    this.getLottery();
+    this.getLotteryInfo(this.lotteryId).then(() => {
+      if (this.lottery.status == 1) {
+        if (this.user.name && this.user.phone) {
+          this.confirmUser(this.user.name, this.user.phone, false);
+        }
+        this.getLotteryResult();
+      } else {
+        if (this.user.name && this.user.phone) {
+          this.registerUser(this.user.name, this.user.phone, false);
+        }
+      }
+    });
   },
   methods: {
-    getLottery() {
-      this.getLotteryInfo(this.lotteryId).then(() => {
-        if (this.lottery.status == 1) {
-          this.getLotteryResult();
-        }
-      });
-    },
     submitJoin() {
       // 第一次需要登陆，之后尝试使用localStorage来记录
       if (!this.user.name || !this.user.phone) {
@@ -232,20 +237,20 @@ export default {
       if (name.valid && phone.valid) {
         this.$dialog.loading.open("拼命加载中...");
         if (this.lottery.status == 0) {
-          this.registerUser();
+          this.registerUser(this.userInput.name, this.userInput.phone, true);
         } else {
-          this.confirmUser();
+          this.confirmUser(this.userInput.name, this.userInput.phone, true);
         }
         this.showFlag = false;
       }
     },
-    registerUser() {
+    registerUser(name, phone, flag) {
       http
         .fetchPost(
           "/api/user/register",
           {
-            name: this.userInput.name,
-            phone: this.userInput.phone
+            name,
+            phone
           },
           {
             params: {
@@ -260,36 +265,42 @@ export default {
             this.user.name = res.data.name;
             this.user.phone = res.data.phone;
             this.user.joinFlag = res.data.joinFlag;
-            window.localStorage.setItem("user", JSON.stringify(this.user));
-            this.$dialog.toast({
-              mes: "登记信息成功",
-              timeout: 1500,
-              icon: "success"
-            });
+            this.saveLocalStorage();
+            if (flag) {
+              this.$dialog.toast({
+                mes: "登记信息成功",
+                timeout: 1500,
+                icon: "success"
+              });
+            }
           } else {
+            if (flag) {
+              this.$dialog.toast({
+                mes: "请稍后重试",
+                timeout: 1500,
+                icon: "error"
+              });
+            }
+          }
+        })
+        .catch(() => {
+          this.$dialog.loading.close();
+          if (flag) {
             this.$dialog.toast({
               mes: "请稍后重试",
               timeout: 1500,
               icon: "error"
             });
           }
-        })
-        .catch(() => {
-          this.$dialog.loading.close();
-          this.$dialog.toast({
-            mes: "请稍后重试",
-            timeout: 1500,
-            icon: "error"
-          });
         });
     },
-    confirmUser() {
+    confirmUser(name, phone, flag) {
       http
         .fetchPost(
           "/api/user/confirm",
           {
-            name: this.userInput.name,
-            phone: this.userInput.phone
+            name,
+            phone
           },
           {
             params: {
@@ -298,28 +309,31 @@ export default {
           }
         )
         .then(res => {
-          this.$dialog.loading.close();
           console.log(res);
           this.user.name = res.data.name;
           this.user.phone = res.data.phone;
           this.user.joinFlag = res.data.joinFlag;
           this.user.awardFlag = res.data.awardFlag;
           this.user.award = Object.assign({}, res.data.award);
-          window.localStorage.setItem("user", JSON.stringify(this.user));
-          this.$dialog.toast({
-            mes: "登记信息成功",
-            timeout: 1500,
-            icon: "success"
-          });
+          this.saveLocalStorage();
+          if (flag) {
+            this.$dialog.toast({
+              mes: "登记信息成功",
+              timeout: 1500,
+              icon: "success"
+            });
+          }
         })
         .catch(() => {
-          this.$dialog.loading.close();
-          this.$dialog.toast({
-            mes: "请稍后重试",
-            timeout: 1500,
-            icon: "error"
-          });
+          if (flag) {
+            this.$dialog.toast({
+              mes: "请稍后重试",
+              timeout: 1500,
+              icon: "error"
+            });
+          }
         });
+      this.$dialog.loading.close();
     },
     getLotteryInfo(id) {
       this.$dialog.loading.open("拼命加载中...");
@@ -368,6 +382,14 @@ export default {
         item.price = this.priceMap.get(item.price);
       }
       return awardList;
+    },
+    saveLocalStorage() {
+      var userStorage = {
+        name: this.user.name,
+        phone: this.user.phone,
+        lotteryId: this.lotteryId
+      };
+      window.localStorage.setItem("user", JSON.stringify(userStorage));
     }
   }
 };
