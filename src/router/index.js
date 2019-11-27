@@ -9,7 +9,10 @@ const routes = [
   {
     path: "/publish",
     name: "publish",
-    component: Publish
+    component: Publish,
+    meta: {
+      checkAdmin: true
+    }
   },
   {
     path: "/join/:lotteryId",
@@ -19,26 +22,23 @@ const routes = [
   {
     path: "/assign/:lotteryId",
     name: "assign",
-    component: () => import("../views/Assign.vue")
+    component: () => import("../views/Assign.vue"),
+    meta: {
+      checkAdmin: true
+    }
   },
   {
     path: "/share",
     name: "share",
-    component: () => import("../views/Share.vue")
+    component: () => import("../views/Share.vue"),
+    meta: {
+      checkAdmin: true
+    }
   },
   {
     path: "/admin",
     name: "admin",
     component: () => import("../views/Admin.vue")
-  },
-  {
-    path: "/about",
-    name: "about",
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/About.vue")
   },
   {
     path: "*",
@@ -50,5 +50,15 @@ const routes = [
 const router = new VueRouter({
   routes
 });
-
+router.beforeEach(function(to, from, next) {
+  console.log(to.meta.checkAdmin);
+  if (to.meta.checkAdmin && !localStorage.getItem("authenticate")) {
+    next({
+      path: "/admin"
+    });
+  } else {
+    next();
+  }
+  console.log(to);
+});
 export default router;

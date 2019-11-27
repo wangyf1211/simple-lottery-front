@@ -50,6 +50,29 @@
         </div>
       </yd-preview>
     </div>
+    <yd-popup v-model="alertShow" position="bottom" height="100%">
+      <h1 style="font-size:1.5rem;margin-top:30%;font-weight:400;">
+        管理员验证
+      </h1>
+      <yd-cell-group title=" " style="margin:30% 0;">
+        <yd-cell-item>
+          <span slot="left">密码：</span>
+          <yd-input
+            slot="right"
+            type="password"
+            v-model="password"
+            placeholder="请输入密码"
+          ></yd-input>
+        </yd-cell-item>
+      </yd-cell-group>
+      <yd-button
+        size="large"
+        type="primary"
+        style="margin: 30px;width:80%;"
+        @click.native="authenticate"
+        >确认</yd-button
+      >
+    </yd-popup>
   </div>
 </template>
 <script>
@@ -83,10 +106,17 @@ export default {
         }
       ],
       statusMap,
-      btns: []
+      btns: [],
+      alertShow: true,
+      password: "",
+      adminFlag: false
     };
   },
   created() {
+    this.adminFlag = localStorage.getItem("authenticate");
+    if (this.adminFlag) {
+      this.alertShow = false;
+    }
     this.getLotteryList();
   },
   methods: {
@@ -116,6 +146,46 @@ export default {
             icon: "error"
           });
         });
+    },
+    authenticate() {
+      this.$dialog.loading.open("拼命加载中...");
+      http
+        .fetchPost(
+          "/api/admin/authenticate",
+          {},
+          {
+            params: { password: this.password }
+          }
+        )
+        .then(res => {
+          this.$dialog.loading.close();
+          if (res.code == 200) {
+            this.adminFlag = true;
+            localStorage.setItem("authenticate", this.adminFlag);
+            this.$dialog.toast({
+              mes: "通过验证",
+              timeout: 1500,
+              icon: "success"
+            });
+            this.alertShow = false;
+          } else {
+            this.$dialog.toast({
+              mes: "验证失败",
+              timeout: 1500,
+              icon: "error"
+            });
+            this.password = "";
+          }
+        })
+        .catch(() => {
+          this.$dialog.toast({
+            mes: "验证失败",
+            timeout: 1500,
+            icon: "error"
+          });
+          this.password = "";
+        });
+      this.$dialog.loading.close();
     }
   }
 };
