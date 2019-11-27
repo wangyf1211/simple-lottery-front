@@ -51,7 +51,6 @@ const router = new VueRouter({
   routes
 });
 router.beforeEach(function(to, from, next) {
-  console.log(to.meta.checkAdmin);
   if (to.meta.checkAdmin && !localStorage.getItem("authenticate")) {
     next({
       path: "/admin"
@@ -59,6 +58,5 @@ router.beforeEach(function(to, from, next) {
   } else {
     next();
   }
-  console.log(to);
 });
 export default router;
