@@ -34,10 +34,10 @@
         </yd-preview-item>
         <yd-preview-item>
           <div slot="left">参与人数</div>
-          <div slot="right">{{ item.joinNum }}</div>
+          <div slot="right">{{ item.count }}</div>
         </yd-preview-item>
         <yd-preview-item v-for="(award, idx) in item.awardList" :key="idx">
-          <div slot="left">{{ award.price }}</div>
+          <div slot="left">{{ award.price | priceFormat }}</div>
           <div slot="right">{{ award.name }} x {{ award.number }}</div>
         </yd-preview-item>
         <div class="btn-group">
@@ -76,7 +76,7 @@
   </div>
 </template>
 <script>
-import { statusMap } from "../global";
+import { statusMap, priceMap } from "../global";
 import http from "../api";
 export default {
   name: "admin",
@@ -87,7 +87,7 @@ export default {
           id: 1,
           description: "默认抽奖详情描述",
           startTime: "2019-11-26 00:00:00",
-          joinNum: 2,
+          count: 2,
           status: 0,
           awardList: [
             {
@@ -106,11 +106,17 @@ export default {
         }
       ],
       statusMap,
+      priceMap,
       btns: [],
       alertShow: true,
       password: "",
       adminFlag: false
     };
+  },
+  filters: {
+    priceFormat(val) {
+      return priceMap.get(val);
+    }
   },
   created() {
     this.adminFlag = localStorage.getItem("authenticate");

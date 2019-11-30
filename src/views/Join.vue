@@ -440,6 +440,12 @@ export default {
   span {
     display: block;
   }
+  > div {
+    width: 80%;
+    word-break: break-all;
+    white-space: pre-line;
+    margin: 0 auto;
+  }
 }
 
 [class|="lottery"] {
